@@ -18,7 +18,11 @@ Any part of the software can be altered since full source code is supplied.
 The general steps to producing a custom codebase are as follows:
 
 #. Make a copy of the reference application directory (e.g. ``app_usb_aud_xk_316_mc`` or ``app_usb_aud_xk_216_mc``)
-   to a separate directory with a different name. Modify the new application to suit the custom requirements. For example:
+   to a separate directory with a different name. Modify the new application to suit the custom requirements.
+   Alternatively, start with the :ref:`minimal template app <app_usb_aud_template>` and customise it to suit the
+   target hardware.
+
+   For example:
 
    * Provide the ``.xn`` file for the target hardware platform by setting the ``APP_HW_TARGET`` in the application's ``CMakeLists.txt``.
    * Update ``xua_conf.h`` with specific defines for the custom application.

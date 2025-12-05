@@ -8,6 +8,8 @@ USB Audio applications
 The reference applications supplied in ``sw_usb_audio`` use the framework provided in ``lib_xua`` and
 provide qualified configurations of the framework which support, and are validated, on an accompanying
 reference hardware platform.
+Additionally, the ``app_usb_aud_template`` application is a minimal starting point for custom
+hardware designs on xcore.ai.
 
 These reference design applications customise and extend this framework to provide the required functionality.
 This document will now examine in detail how each of the provided applications customise and extend the framework.
@@ -22,4 +24,5 @@ Refer to `lib_xua` <https://www.xmos.com/file/lib_xua>`_ documentation for full 
 
     app_316_mc
     app_216_mc
+    app_usb_aud_template
 

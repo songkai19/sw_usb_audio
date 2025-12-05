@@ -1,6 +1,6 @@
 // This file relates to internal XMOS infrastructure and should be ignored by external users
 
-@Library('xmos_jenkins_shared_library@v0.43.1') _
+@Library('xmos_jenkins_shared_library@v0.43.3') _
 
 // Get XCommon CMake.
 // This is required for compiling a factory image for a DFU test using tools 15.2.1
@@ -44,7 +44,7 @@ pipeline {
 
     string(
       name: 'INFR_APPS_VERSION',
-      defaultValue: 'v3.1.1',
+      defaultValue: 'v3.2.1',
       description: 'The infr_apps version'
     )
     choice(name: 'TEST_LEVEL', choices: ['smoke', 'nightly', 'weekend'],

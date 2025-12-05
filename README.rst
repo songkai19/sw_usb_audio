@@ -9,7 +9,7 @@ sw_usb_audio: USB Audio reference designs
 :scope: General Use
 :description: USB Audio reference designs
 :category: Audio
-:keywords: USB Audio, DFU, USB, I2S, ADAT, SPDIF
+:keywords: USB Audio, USB
 :hardware: XK-AUDIO-216-MC, XK-AUDIO-316-MC, XK-EVK-XU316
 
 *******
@@ -54,6 +54,8 @@ This repository contains the following:
 | app_usb_aud_xk_316_mc    | xk-audio-316-mc          | xcore.ai Multi-channel Audio Board         |
 +--------------------------+--------------------------+--------------------------------------------+
 | app_usb_aud_xk_evk_xu316 | xk-evk-xu316             | xcore.ai Evaluation Kit                    |
++--------------------------+--------------------------+--------------------------------------------+
+| app_usb_aud_template     |                          | Template/blank application                 |
 +--------------------------+--------------------------+--------------------------------------------+
 
 Please refer to individual README files in these apps for more detailed information.

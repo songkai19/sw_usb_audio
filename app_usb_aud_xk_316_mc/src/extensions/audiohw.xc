@@ -22,10 +22,10 @@
 static xk_audio_316_mc_ab_config_t config =
 {
     // clk_mode
-    (XUA_SYNCMODE == XUA_SYNCMODE_SYNC || XUA_SPDIF_RX_EN || XUA_ADAT_RX_EN)
+    (ADJUSTABLE_MCLK_REQUIRED)
     ? ( XUA_USE_SW_PLL
         ? CLK_PLL : CLK_CS2100 )
-    : CLK_FIXED,
+    : CLK_NONE, /* fixed clock generated in lib_xua using the application PLL */
 
     // dac_is_clk_master
     CODEC_MASTER,
