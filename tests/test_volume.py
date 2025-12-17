@@ -34,9 +34,10 @@ def volume_uncollect(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=volume_uncollect)
 @pytest.mark.parametrize(["board", "config"], volume_configs)
-def test_volume_input(pytestconfig, board, config):
+def test_volume_input(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     fs = max(features["samp_freqs"])
+    print(f"{request.node.name}, fs: {fs}")
     num_chans = features["analogue_i"]
     if board == "xk_316_mc" and features["tdm8"]:
         num_chans = 4 # Can only test 4 analogue input channels in tdm without jumper change
@@ -114,9 +115,10 @@ def test_volume_input(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=volume_uncollect)
 @pytest.mark.parametrize(["board", "config"], volume_configs)
-def test_volume_output(pytestconfig, board, config):
+def test_volume_output(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     fs = max(features["samp_freqs"])
+    print(f"{request.node.name}, fs: {fs}")
     num_chans = features["analogue_o"]
     if board == "xk_316_mc" and features["tdm8"]:
         num_chans = 2 # Can only test 2 analogue output channels in tdm without jumper change
