@@ -106,7 +106,7 @@ def test_analogue_input(pytestconfig, board, config):
             xsig_lines = xsig_proc.proc_output
             with open(xsig_config_path) as file:
                 xsig_json = json.load(file)
-            failures = check_analyzer_output(xsig_lines, xsig_json["in"])
+            failures = check_analyzer_output(xsig_lines, xsig_json["in"], skip_signal_check=not bool(features.get("codec_configured", True)))
             if len(failures) > 0:
                 fail_str += f"Failure at sample rate {fs}\n"
                 fail_str += "\n".join(failures) + "\n\n"
@@ -171,7 +171,7 @@ def test_analogue_output(pytestconfig, board, config):
 
             with open(xsig_config_path) as file:
                 xsig_json = json.load(file)
-            failures = check_analyzer_output(xscope_lines, xsig_json["out"])
+            failures = check_analyzer_output(xscope_lines, xsig_json["out"], skip_signal_check=not bool(features.get("codec_configured", True)))
             if len(failures) > 0:
                 fail_str += f"Failure at sample rate {fs}\n"
                 fail_str += "\n".join(failures) + "\n\n"

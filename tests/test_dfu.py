@@ -11,13 +11,21 @@ from conftest import get_firmware_path, AppUsbAudDut, get_xtag_dut
 
 
 def get_dfu_bin_path(board, config):
-    return (
-        Path(__file__).parents[1]
-        / f"app_usb_aud_{board}"
-        / "bin"
-        / f"{config}"
-        / f"app_usb_aud_{board}_{config}.bin"
-    )
+    if config:
+        return (
+            Path(__file__).parents[1]
+            / f"app_usb_aud_{board}"
+            / "bin"
+            / f"{config}"
+            / f"app_usb_aud_{board}_{config}.bin"
+        )
+    else:
+        return (
+            Path(__file__).parents[1]
+            / f"app_usb_aud_{board}"
+            / "bin"
+            / f"app_usb_aud_{board}.bin"
+        )
 
 
 def create_dfu_bin(board, config):
@@ -58,6 +66,7 @@ dfu_testcases = [
     ("xk_316_mc", "1SMi2o2xxxxxx"),
     ("xk_evk_xu316", "2AMi2o2xxxxxx"),
     ("xk_316_mc", "1SMi2o2xxxxxx_old_tools"), # factory image built with older XTC tools to test that we can upgrade from one XTC version to another
+    ("template", "")
 ]
 
 
@@ -85,7 +94,17 @@ def dfu_uncollect(pytestconfig, board, config, dfuapp):
             return True
     return False
 
+'''
+Sequence when testing the template app:
+app_usb_aud_template -download-> (xk_316_mc, upgrade1) -download-> app_usb_aud_template -upload-> test_dfu_upload.bin
+-revert_factory-> app_usb_aud_template -download-> (xk_316_mc, upgrade1) -download-> test_dfu_upload.bin
+-revert_factory
 
+Sequence when testing other apps (eg. xk_316_mc, 2AMi10o10xssxxx):
+(xk_316_mc, 2AMi10o10xssxxx) -download-> (xk_316_mc, upgrade1) -download-> (xk_316_mc, upgrade2) -upload-> test_dfu_upload.bin
+-revert_factory-> (xk_316_mc, 2AMi10o10xssxxx) -download-> test_dfu_upload.bin
+-revert_factory
+'''
 @pytest.mark.uncollect_if(func=dfu_uncollect)
 @pytest.mark.parametrize(["board", "config"], dfu_testcases)
 @pytest.mark.parametrize("dfuapp", ["custom", "dfu-util"])
@@ -108,7 +127,10 @@ def test_dfu(pytestconfig, board, config, dfuapp):
         elif "1SM" in config:
             dfu_bin1 = create_dfu_bin(board, "uac1_upgrade1")
         else:
-            dfu_bin1 = create_dfu_bin(board, "upgrade1")
+            if board == "template":
+                dfu_bin1 = create_dfu_bin("xk_316_mc", "upgrade1")
+            else:
+                dfu_bin1 = create_dfu_bin(board, "upgrade1")
 
         dfu_test.download(dfu_bin1)
         version = dfu_test.get_bcd_version()
@@ -121,7 +143,11 @@ def test_dfu(pytestconfig, board, config, dfuapp):
         elif "1SM" in config:
             dfu_bin2 = create_dfu_bin(board, "uac1_upgrade2")
         else:
-            dfu_bin2 = create_dfu_bin(board, "upgrade2")
+            if board == "template": # for template, go back to the app_usb_aud_template so we can test dfu upload for it
+                dfu_bin2 = create_dfu_bin(board, "")
+                exp_version2 = initial_version
+            else:
+                dfu_bin2 = create_dfu_bin(board, "upgrade2")
 
         dfu_test.download(dfu_bin2)
         version = dfu_test.get_bcd_version()
@@ -140,6 +166,14 @@ def test_dfu(pytestconfig, board, config, dfuapp):
             pytest.fail(
                 f"After factory reset, version {version} didn't match initial {initial_version}"
             )
+
+        # Needed for template app
+        # Download (xk_316_mc, upgrade1) first so that when downloading upload_file, a version change can be observed
+        if board == "template":
+            dfu_test.download(dfu_bin1)
+            version = dfu_test.get_bcd_version()
+            if version != exp_version1:
+                pytest.fail(f"Unexpected version {version} after first upgrade")
 
         dfu_test.download(upload_file)
         upload_file.unlink()

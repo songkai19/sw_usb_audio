@@ -1,3 +1,6 @@
+app_usb_aud_template:
+  full_configs: []
+  partial_configs: []
 app_usb_aud_xk_216_mc:
   full_configs:
   - 2AMi10o10xssxxx

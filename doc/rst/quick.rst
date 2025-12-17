@@ -142,7 +142,8 @@ based build system.
     See :ref:`proj_build_system` for more details.
 
 Each board is supported by a dedicated application located in its own directory. The boards and
-their corresponding applications are listed in :numref:`table_quick_start_boards`.
+their corresponding applications are listed in :numref:`table_quick_start_boards`. In addition, a :ref:`template
+application <app_usb_aud_template>` is provided as a getting started point when porting to new hardware.
 
 .. _table_quick_start_boards:
 
@@ -157,6 +158,8 @@ their corresponding applications are listed in :numref:`table_quick_start_boards
    | XK-AUDIO-216-MC     | app_usb_aud_xk_audio_216_mc   |
    +---------------------+-------------------------------+
    | XK-AUDIO-316-MC     | app_usb_aud_xk_audio_316_mc   |
+   +---------------------+-------------------------------+
+   | Custom board        | app_usb_aud_template          |
    +---------------------+-------------------------------+
 
 The primary configuration for applications is in `CMakeLists.txt`. It is present in each
@@ -200,6 +203,8 @@ evaluation.
    | app_usb_aud_xk_audio_216_mc   | 2AMi10o10xssxxx           | UAC 2.0, 10 ch in/out, 8 analogue channels in/out, S/PDIF in/out  |
    +-------------------------------+---------------------------+-------------------------------------------------------------------+
    | app_usb_aud_xk_audio_316_mc   | 2AMi2o2xxxxxx             | UAC 2.0, 2 ch in/out, 2 analogue channels in/out                  |
+   +-------------------------------+---------------------------+-------------------------------------------------------------------+
+   | app_usb_aud_template          |                           | UAC 2.0, 2 ch in/out, 2 analogue channels in/out                  |
    +-------------------------------+---------------------------+-------------------------------------------------------------------+
 
 |endfullwidth|
@@ -270,5 +275,3 @@ To play and record audio using the USB Audio board, follow these steps:
 #. In your audio application, select the `XMOS` USB Audio device.
 
 #. Begin audio playback and/or recording.
-
-

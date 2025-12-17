@@ -80,9 +80,10 @@ def mixer_not_smoke_uncollect(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=mixer_not_smoke_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_routing_ctrl_input(pytestconfig, board, config):
+def test_routing_ctrl_input(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     fs = max(features["samp_freqs"])
+    print(f"{request.node.name}, fs: {fs}")
 
     xsig_config = 'routed_input_8ch'
     if board == "xk_316_mc" and features["tdm8"]:
@@ -132,9 +133,11 @@ def test_routing_ctrl_input(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=mixer_not_smoke_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_routing_ctrl_output(pytestconfig, board, config):
+def test_routing_ctrl_output(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     fs = max(features["samp_freqs"])
+
+    print(f"{request.node.name}, fs: {fs}")
     xsig_config_path = (
         Path(__file__).parent / "xsig_configs" / "mc_analogue_output_8ch.json"
     )
@@ -187,10 +190,12 @@ def clear_default_mixes(ctrl, num_mixes):
 
 @pytest.mark.uncollect_if(func=mixer_not_smoke_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_mixing_ctrl_input(pytestconfig, board, config):
+def test_mixing_ctrl_input(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     # Limit to 96kHz to be able to use all 8 mixes
     fs = min(96000, max([f for f in features["samp_freqs"] if f <= 96000]))
+
+    print(f"{request.node.name}, fs: {fs}")
     if board == "xk_316_mc" and features["tdm8"]:
         xsig_config_path = Path(__file__).parent / "xsig_configs" / "routed_input_4ch.json"
     else:
@@ -274,16 +279,19 @@ def test_mixing_ctrl_input(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=mixing_ctrl_output_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_mixing_ctrl_output(pytestconfig, board, config):
+def test_mixing_ctrl_output(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     # Limit to 96kHz to be able to use all 8 mixes
     fs = min(96000, max([f for f in features["samp_freqs"] if f <= 96000]))
+
     xsig_config_path = (
         Path(__file__).parent / "xsig_configs" / "mc_analogue_output_8ch.json"
     )
     adapter_dut, adapter_harness = get_xtag_dut_and_harness(pytestconfig, board)
     duration = 10
     fail_str = ""
+
+    print(f"{request.node.name}, fs: {fs}")
 
     with (
         AppUsbAudDut(adapter_dut, board, config) as dut,
@@ -337,10 +345,12 @@ def test_mixing_ctrl_output(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=mixer_not_smoke_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_mixing_multi_channel_output(pytestconfig, board, config):
+def test_mixing_multi_channel_output(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     # Limit to 96kHz to be able to use all 8 mixes
     fs = min(96000, max([f for f in features["samp_freqs"] if f <= 96000]))
+
+    print(f"{request.node.name}, fs: {fs}")
     xsig_config_path = (
         Path(__file__).parent
         / "xsig_configs"
@@ -403,10 +413,13 @@ def test_mixing_multi_channel_output(pytestconfig, board, config):
 
 @pytest.mark.uncollect_if(func=mixer_not_smoke_uncollect)
 @pytest.mark.parametrize(["board", "config"], mixer_configs)
-def test_routing_daw_out_mix_input(pytestconfig, board, config):
+def test_routing_daw_out_mix_input(pytestconfig, board, config, request):
     features = get_config_features(board, config)
     # Limit to 96kHz to be able to use all 8 mixes
     fs = min(96000, max([f for f in features["samp_freqs"] if f <= 96000]))
+
+    print(f"{request.node.name}, fs: {fs}")
+
     xsig_config_path = (
         Path(__file__).parent / "xsig_configs" / "mc_analogue_output_8ch.json"
     )
