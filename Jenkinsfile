@@ -224,7 +224,7 @@ pipeline {
                           copyArtifacts filter: 'bin-macos-x86/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
                         }
                         dir("xmosdfu") {
-                          copyArtifacts filter: 'OSX/x86/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_xua/develop', flatten: true, selector: lastSuccessful()
+                          copyArtifacts filter: 'host/macos-x86_64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_dfu/develop', flatten: true, selector: lastSuccessful()
                         }
                       } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
 
@@ -288,7 +288,7 @@ pipeline {
                           copyArtifacts filter: 'bin-macos-arm/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
                         }
                         dir("xmosdfu") {
-                          copyArtifacts filter: 'OSX/arm64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_xua/develop', flatten: true, selector: lastSuccessful()
+                          copyArtifacts filter: 'host/macos-arm64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_dfu/develop', flatten: true, selector: lastSuccessful()
                         }
                       } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
 
