@@ -1,6 +1,6 @@
 // This file relates to internal XMOS infrastructure and should be ignored by external users
 
-@Library('xmos_jenkins_shared_library@v0.43.3') _
+@Library('xmos_jenkins_shared_library@v0.51.1') _
 
 // Get XCommon CMake.
 // This is required for compiling a factory image for a DFU test using tools 15.2.1
@@ -39,12 +39,12 @@ pipeline {
     )
     string(
       name: 'XMOSDOC_VERSION',
-      defaultValue: 'v8.0.0',
+      defaultValue: 'v8.0.3',
       description: 'The xmosdoc version')
 
     string(
       name: 'INFR_APPS_VERSION',
-      defaultValue: 'v3.2.1',
+      defaultValue: 'v3.4.0',
       description: 'The infr_apps version'
     )
     choice(name: 'TEST_LEVEL', choices: ['smoke', 'nightly', 'weekend'],
@@ -62,6 +62,9 @@ pipeline {
   }
   stages {
     stage('Setup') {
+      agent {
+        label 'linux && x86_64'
+      }
       steps {
         script {
           def (server, user, repo) = extractFromScmUrl()
@@ -71,7 +74,7 @@ pipeline {
     }
     stage('Build') {
       parallel {
-        stage('🏗️ xcommon cmake Build + lib checks') {
+        stage('🏗️ Build') {
           agent {
             label 'linux && x86_64'
           }
@@ -98,7 +101,7 @@ pipeline {
                   }
 
                   dir("app_usb_aud_xk_316_mc") {
-                    xcoreBuild(buildDir: "build_loopback", archive_bins: false, cmakeOpts: "-DPARTIAL_TESTED_CONFIGS=1 -DEXTRA_BUILD_FLAGS='-DI2S_LOOPBACK=1' -DENABLE_I2S_TIMING_CHECK=ON")
+                    xcoreBuild(buildDir: "build_loopback", archiveBins: false, cmakeOpts: "-DPARTIAL_TESTED_CONFIGS=1 -DEXTRA_BUILD_FLAGS='-DI2S_LOOPBACK=1' -DENABLE_I2S_TIMING_CHECK=ON")
                     sh 'for folder in bin/?*; do if [[ ! $folder == *"old_tools"* ]] ; then mv "$folder" "${folder/%/_i2sloopback}"; fi ; done'
                     sh 'for config in bin/?*/*.xe; do if [[ ! $config == *"old_tools"* ]] ; then mv "$config" "${config/%.xe/_i2sloopback.xe}"; fi ; done'
                   }
@@ -112,6 +115,35 @@ pipeline {
               }
             } // stage('Apps build')
 
+            stage("Archive sandbox") {
+              steps {
+                archiveSandbox(REPO_NAME)
+              }
+            } // stage("Archive sandbox")
+          } // stages
+          post {
+            cleanup {
+              xcoreCleanSandbox()
+            }
+          }
+        } // stage('🏗️ Build')
+
+        stage('Docs and lib checks') {
+          // Use XCommon CMake to fetch dependencies, but then build using legacy XCommon Makefiles
+          agent {
+            label 'linux && x86_64'
+          }
+          stages {
+            stage('Checkout') {
+              steps {
+                println "Stage running on ${env.NODE_NAME}"
+
+                dir(REPO_NAME){
+                  checkoutScmShallow()
+                }
+              }
+            } // stage('Checkout')
+            
             stage('Repo checks') {
               steps {
                 warnError("Repo checks failed")
@@ -125,6 +157,10 @@ pipeline {
               steps {
                 dir(REPO_NAME) {
                   createVenv()
+                  withTools(params.TOOLS_VERSION) {
+                    // Fetch all dependencies using XCommon CMake
+                    sh "cmake -G 'Unix Makefiles' -B build -DDEPS_CLONE_SHALLOW=TRUE"
+                  }
                   buildDocs(xmosdocVenvPath: ".")
                 } // dir(REPO_NAME)
               } // steps
@@ -144,46 +180,13 @@ pipeline {
               }
             }
 
-            stage("Archive sandbox") {
-              steps {
-                archiveSandbox(REPO_NAME)
-              }
-            } // stage("Archive sandbox")
           } // stages
           post {
             cleanup {
               xcoreCleanSandbox()
             }
-          }
-        } // stage('🏗️ xcommon cmake Build and lib checks')
-
-        stage('legacy xmake build') {
-          // Use XCommon CMake to fetch dependencies, but then build using legacy XCommon Makefiles
-          agent {
-            label 'linux && x86_64'
-          }
-          steps {
-            println "Stage running on ${env.NODE_NAME}"
-
-            dir(REPO_NAME) {
-              checkoutScmShallow()
-
-              withTools(params.TOOLS_VERSION) {
-                // Fetch all dependencies using XCommon CMake
-                sh "cmake -G 'Unix Makefiles' -B build -DDEPS_CLONE_SHALLOW=TRUE"
-                sh 'xmake -C app_usb_aud_xk_316_mc -j16'
-                sh 'xmake -C app_usb_aud_xk_216_mc -j16'
-                sh 'xmake -C app_usb_aud_xk_evk_xu316 -j16'
-                sh 'xmake -C app_usb_aud_xk_evk_xu316_extrai2s -j16'
-              }
-            }
-          } // steps
-          post {
-            cleanup {
-              xcoreCleanSandbox()
-            }
           } // post
-        } // stage('legacy xmake build')
+        } // stage('Docs and lib checks')
       } // parallel
     }  // stage('Build')
 
@@ -224,7 +227,7 @@ pipeline {
                           copyArtifacts filter: 'bin-macos-x86/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
                         }
                         dir("xmosdfu") {
-                          copyArtifacts filter: 'OSX/x86/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_xua/develop', flatten: true, selector: lastSuccessful()
+                          copyArtifacts filter: 'host/macos-x86_64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_dfu/PR-100', flatten: true, selector: lastSuccessful()
                         }
                       } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
 
@@ -288,7 +291,7 @@ pipeline {
                           copyArtifacts filter: 'bin-macos-arm/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
                         }
                         dir("xmosdfu") {
-                          copyArtifacts filter: 'OSX/arm64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_xua/develop', flatten: true, selector: lastSuccessful()
+                          copyArtifacts filter: 'host/macos-arm64/xmosdfu', fingerprintArtifacts: true, projectName: 'XMOS/lib_dfu/PR-100', flatten: true, selector: lastSuccessful()
                         }
                       } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
 

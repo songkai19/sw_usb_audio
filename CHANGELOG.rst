@@ -97,8 +97,8 @@ UNRELEASED
 
     - lib_xud: 3.0.1 -> 4.0.0
 
-      + ADDED: Support for high bandwidth ISO endpoints
-      + REMOVED: Support for legacy API XUD_Manager()
+      + ADDED:    Support for high bandwidth ISO endpoints
+      + REMOVED:  Support for legacy API XUD_Manager()
 
 9.1.0
 -----
