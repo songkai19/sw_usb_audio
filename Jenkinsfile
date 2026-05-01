@@ -1,6 +1,6 @@
 // This file relates to internal XMOS infrastructure and should be ignored by external users
 
-@Library('xmos_jenkins_shared_library@v0.49.0') _
+@Library('xmos_jenkins_shared_library@v0.51.1') _
 
 // Get XCommon CMake.
 // This is required for compiling a factory image for a DFU test using tools 15.2.1
@@ -39,7 +39,7 @@ pipeline {
     )
     string(
       name: 'XMOSDOC_VERSION',
-      defaultValue: 'v8.0.1',
+      defaultValue: 'v8.0.3',
       description: 'The xmosdoc version')
 
     string(
@@ -233,9 +233,9 @@ pipeline {
 
                       withXTAG(["usb_audio_mc_xs2_dut", "usb_audio_mc_xs2_harness", \
                                 "usb_audio_xcai_exp_dut", "usb_audio_xcai_exp_harness"]) { xtagIds ->
-                        sh "pytest -v --level nightly --junitxml=pytest_result_mac_intel.xml \
+                        sh "pytest -v --level ${params.TEST_LEVEL} --junitxml=pytest_result_mac_intel.xml \
                             -o xk_216_mc_dut=${xtagIds[0]} -o xk_216_mc_harness=${xtagIds[1]} \
-                            -o xk_evk_xu316_dut=${xtagIds[2]} -o xk_evk_xu316_harness=${xtagIds[3]} --midi-send-delay 0.001 -k dfu"
+                            -o xk_evk_xu316_dut=${xtagIds[2]} -o xk_evk_xu316_harness=${xtagIds[3]} --midi-send-delay 0.001"
                       }
                       archiveArtifacts artifacts: "${env.VIRTUAL_ENV}/src/hardware-test-tools/xsig/glitch.*.csv", fingerprint: true, allowEmptyArchive: true
                     }
@@ -296,9 +296,9 @@ pipeline {
                       } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
 
                       withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
-                        sh "pytest -v --level nightly --junitxml=pytest_result_mac_arm.xml \
+                        sh "pytest -v --level ${params.TEST_LEVEL} --junitxml=pytest_result_mac_arm.xml \
                             -o xk_316_mc_dut=${xtagIds[0]} -o xk_316_mc_harness=${xtagIds[1]} \
-                            -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]} -k dfu"
+                            -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]}"
                       }
                       archiveArtifacts artifacts: "${env.VIRTUAL_ENV}/src/hardware-test-tools/xsig/glitch.*.csv", fingerprint: true, allowEmptyArchive: true
                     }
@@ -356,9 +356,9 @@ pipeline {
                       }
                     } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
                     withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
-                      sh "pytest -v --level nightly --junitxml=pytest_result_windows10.xml \
+                      sh "pytest -v --level ${params.TEST_LEVEL} --junitxml=pytest_result_windows10.xml \
                           -o xk_316_mc_dut=${xtagIds[0]} -o xk_316_mc_harness=${xtagIds[1]} \
-                          -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]} -k dfu"
+                          -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]}"
                     }
                     archiveArtifacts artifacts: "${env.VIRTUAL_ENV}/src/hardware-test-tools/xsig/glitch.*.csv", fingerprint: true, allowEmptyArchive: true
                   }
@@ -415,9 +415,9 @@ pipeline {
                       }
                     } // dir("${env.VIRTUAL_ENV}/src/hardware-test-tools")
                     withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
-                      sh "pytest -v --level nightly --junitxml=pytest_result_windows11.xml \
+                      sh "pytest -v --level ${params.TEST_LEVEL} --junitxml=pytest_result_windows11.xml \
                           -o xk_316_mc_dut=${xtagIds[0]} -o xk_316_mc_harness=${xtagIds[1]} \
-                          -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]} -k dfu"
+                          -o template_dut=${xtagIds[0]} -o template_harness=${xtagIds[1]}"
                     }
                     archiveArtifacts artifacts: "${env.VIRTUAL_ENV}/src/hardware-test-tools/xsig/glitch.*.csv", fingerprint: true, allowEmptyArchive: true
                   }
