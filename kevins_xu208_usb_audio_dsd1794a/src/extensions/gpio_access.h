@@ -1,0 +1,12 @@
+#ifndef _GPIO_ACCESS_H_
+#define _GPIO_ACCESS_H_
+
+#include "..\core\app_usb_aud_xk_208_mc.h"
+
+void set_gpio(unsigned bit, unsigned value);
+void p_gpio_lock();
+void p_gpio_unlock();
+unsigned p_gpio_peek();
+void p_gpio_out(unsigned x);
+
+#endif
