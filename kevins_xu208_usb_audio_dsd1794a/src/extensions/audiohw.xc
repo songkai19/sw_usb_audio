@@ -58,8 +58,8 @@ void AudioHwInit(void)
     // SINGLE MODE (4E0=1, 4E1=0)
     p_mode_sel   <: 0x01;
     // 441 MODE + PCM MODE (4F0=0, 4F1=0)
-    p_clk_fmt <: 0x00;
-    wait_us(5000); 
+    p_clk_fmt <: 0x00; 
+    wait_us(5000);
 
     return;
 }

@@ -146,6 +146,10 @@
 #endif
 #endif
 
+#ifndef XUA_POWERMODE_SELF
+#define XUA_POWERMODE_SELF (1)
+#endif
+
 /* Board power source - Default is self-powered */
 #ifndef XUA_POWERMODE
 #define XUA_POWERMODE XUA_POWERMODE_SELF
