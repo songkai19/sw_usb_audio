@@ -1,4 +1,4 @@
-// Copyright 2021-2025 XMOS LIMITED.
+// Copyright 2021-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include "xua.h"
 #include "xk_evk_xu316/board.h"
@@ -10,8 +10,7 @@
 
 static const xk_evk_xu316_config_t config = {
 
-    // mclk
-    (DEFAULT_FREQ % 22050 == 0) ? MCLK_441 : MCLK_48,
+    0 /* fixed mclk using the app PLL generated in lib_xua*/
 };
 
 
@@ -33,6 +32,6 @@ void AudioHwInit()
 void AudioHwConfig(unsigned samFreq, unsigned mClk, unsigned dsdMode,
     unsigned sampRes_DAC, unsigned sampRes_ADC)
 {
-    xk_evk_xu316_AudioHwConfig(samFreq, mClk, dsdMode, sampRes_DAC, sampRes_ADC);
+    xk_evk_xu316_AudioHwConfig(samFreq, 0, dsdMode, sampRes_DAC, sampRes_ADC);
 }
 

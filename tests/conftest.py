@@ -1,4 +1,4 @@
-# Copyright 2020-2025 XMOS LIMITED.
+# Copyright 2020-2026 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import pytest
 from pathlib import Path
@@ -37,6 +37,8 @@ def pytest_addoption(parser):
     parser.addini("xk_316_mc_harness", help="XTAG ID for xk_316_mc harness")
     parser.addini("xk_evk_xu316_dut", help="XTAG ID for xk_evk_xu316 DUT")
     parser.addini("xk_evk_xu316_harness", help="XTAG ID for xk_evk_xu316 harness")
+    parser.addini("template_dut", help="XTAG ID for template DUT")
+    parser.addini("template_harness", help="XTAG ID for template harness")
 
 
 boards = ["xk_216_mc", "xk_316_mc", "xk_evk_xu316"]
@@ -51,11 +53,26 @@ all_freqs = [44100, 48000, 88200, 96000, 176400, 192000]
 def samp_freqs_upto(max):
     return [fs for fs in all_freqs if fs <= max]
 
+def parse_custom_board_features(board):
+    assert board in ["template"] # only one custom app present atm
+    if board == "template":
+        features = {'uac': '2', 'sync_mode': 'A', 'i2s': 'M', 'chan_i': 2, 'chan_o': 2}
+        for k in ["midi", "spdif_i", "spdif_o", "adat_i", "adat_o", "dsd", "tdm8", "hibw"]:
+            features[k] = False
+        features["codec_configured"] = False # To skip signal check in the analogue tests
+        features["pid"] = (0x16, 0xD016)
+        features["analogue_i"] = features["chan_i"]
+        features["analogue_o"] = features["chan_o"]
+        features["i2s_loopback"] = False
+        features["samp_freqs"] = samp_freqs_upto(192000)
+        features["partial"] = True
+        return features
+
 
 def parse_features(board, config):
     max_analogue_chans = 8
 
-    config_re = r"^(?P<uac>[12])(?P<sync_mode>[ADS])(?P<i2s>[MSX])i(?P<chan_i>\d+)o(?P<chan_o>\d+)(?P<midi>[mx])(?P<spdif_i>[sx])(?P<spdif_o>[sx])(?P<adat_i>[ax])(?P<adat_o>[ax])(?P<dsd>[dx])(?P<tdm8>(_tdm8)?)(?P<hibw>(_hibw)?)"
+    config_re = r"^(?P<uac>[12])(?P<sync_mode>[ADS])(?P<i2s>[MSX])i(?P<chan_i>\d+)o(?P<chan_o>\d+)(?P<midi>[mx])(?P<spdif_i>[sx])(?P<spdif_o>[sx])(?P<adat_i>[ax])(?P<adat_o>[ax])(?P<dsd>[dx])(?P<tdm8>(_tdm8)?)(?P<mix8>(_mix8)?)(?P<hibw>(_hibw)?)"
     match = re.search(config_re, config)
     if not match:
         pytest.exit(f"Error: Unable to parse features from {config}")
@@ -167,19 +184,24 @@ def pytest_sessionstart(session):
         partial_configs = config_dict[app_name]['partial_configs']
         all_configs = [*full_configs, *partial_configs]
 
-        for config in all_configs:
-            global board_configs
-            features = parse_features(board, config)
-            # Mark the relevant configs for partial testing only
-            features["partial"] = config in partial_configs
-            board_configs[f"{board}-{config}"] = features
+        if len(all_configs):
+            for config in all_configs:
+                global board_configs
+                features = parse_features(board, config)
+                # Mark the relevant configs for partial testing only
+                features["partial"] = config in partial_configs
+                board_configs[f"{board}-{config}"] = features
 
-            # add in the i2s loopback configs used for testing on 316
-            if board == "xk_316_mc":
-                features_i2sloopback = features.copy()
-                features_i2sloopback["i2s_loopback"] = True
-                features_i2sloopback["analogue_i"] = 0
-                board_configs[f"{board}-{config}_i2sloopback"] = features_i2sloopback
+                # add in the i2s loopback configs used for testing on 316
+                if board == "xk_316_mc":
+                    features_i2sloopback = features.copy()
+                    features_i2sloopback["i2s_loopback"] = True
+                    features_i2sloopback["analogue_i"] = 0
+                    board_configs[f"{board}-{config}_i2sloopback"] = features_i2sloopback
+        else: # app has only one config <app>/bin/<app>.xe
+            features = parse_custom_board_features(board) # instead of modifying multiple other functions to support this, add a dedicated function
+            board_configs[f"{board}-"] = features
+
 
 
 def list_configs():
@@ -242,6 +264,7 @@ def get_firmware_path(board, config):
         fw_path_base = Path(__file__).parents[1] / f"app_usb_aud_{board}" / "bin" / config
         fw_path = fw_path_base / xe_name
     else:
+        fw_path_base = Path(__file__).parents[1] / f"app_usb_aud_{board}" / "bin"
         xe_name = f"app_usb_aud_{board}.xe"
         fw_path = fw_path_base / xe_name
     if not fw_path.exists():

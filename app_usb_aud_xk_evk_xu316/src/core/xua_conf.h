@@ -1,4 +1,4 @@
-// Copyright 2021-2025 XMOS LIMITED.
+// Copyright 2021-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 /**
  * @file       xua_conf.h
@@ -13,7 +13,7 @@
 /*
  * Device configuration option defines to override default defines found in lib_xua/api/xua_conf_default.h
  *
- * Build can be customised but changing and adding defines here
+ * Build can be customised by changing and adding defines here
  *
  * Note, we check if they are already defined in Makefile
  */
@@ -38,8 +38,10 @@
 #define MAX_MIX_COUNT      (0)
 #endif
 
-/* Board is self-powered i.e. not USB bus-powered */
-#define SELF_POWERED       (0)
+/* Board power source - Default is bus-powered */
+#ifndef XUA_POWERMODE
+#define XUA_POWERMODE      XUA_POWERMODE_BUS
+#endif
 
 /* Enable/Disable MIDI - Default is MIDI off */
 #ifndef MIDI

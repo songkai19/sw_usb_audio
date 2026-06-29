@@ -1,4 +1,4 @@
-// Copyright 2012-2025 XMOS LIMITED.
+// Copyright 2012-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 /**
  * @file       xua_conf.h
@@ -17,7 +17,7 @@
 /*
  * Device configuration option defines to override default defines found in lib_xua/api/xua_conf_default.h
  *
- * Build can be customised but changing and adding defines here
+ * Build can be customised by changing and adding defines here
  *
  * Note, we check if they are already defined in Makefile
  */

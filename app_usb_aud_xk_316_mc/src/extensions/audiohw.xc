@@ -1,4 +1,4 @@
-// Copyright 2022-2025 XMOS LIMITED.
+// Copyright 2022-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include "xua.h"
 #include <xk_audio_316_mc_ab/board.h>
@@ -22,10 +22,10 @@
 static xk_audio_316_mc_ab_config_t config =
 {
     // clk_mode
-    (XUA_SYNCMODE == XUA_SYNCMODE_SYNC || XUA_SPDIF_RX_EN || XUA_ADAT_RX_EN)
+    (ADJUSTABLE_MCLK_REQUIRED)
     ? ( XUA_USE_SW_PLL
         ? CLK_PLL : CLK_CS2100 )
-    : CLK_FIXED,
+    : CLK_NONE, /* fixed clock generated in lib_xua using the application PLL */
 
     // dac_is_clk_master
     CODEC_MASTER,
