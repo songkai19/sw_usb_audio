@@ -104,6 +104,13 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
     unsigned mode_val = 0x01; // P1, P2 倍频控制 (4E0, 4E1)
     unsigned clk_fmt_val = 0x00; // P3, P4 基准与格式 (4F0, 4F1)
 
+    if (mClk == MCLK_441) {
+        p_clk_en <: 0x01;
+    } else {
+        p_clk_en <: 0x02;
+    }
+    wait_us(20000);
+
     /* ========================================================================= */
     /* 分支 A：当前进入 DSD 播放模式 */
     /* ========================================================================= */
@@ -138,13 +145,13 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
 
         /* DSD 核心时钟强行锁定：DSD1794A 硬件规定 DSD 必须使用 22.5792MHz 晶振 (MCLK_441) */
         // 只在第一次模式切换时锁定22M晶振，并且修改DSD模式标志位引脚状态
-        p_clk_en <: 0x01;
-        wait_us(20000);
+        // p_clk_en <: 0x01;
+        // wait_us(20000);
 
         /* 配置格式控制脚：4F0=0 (441基准), 4F1=1 (DSD模式电平拉高) -> 二进制 0010 = 0x02 */
-        // clk_fmt_val = 0x02;
-        // p_clk_fmt <: clk_fmt_val;
-        // wait_us(1000);
+        clk_fmt_val = 0x02;
+        p_clk_fmt <: clk_fmt_val;
+        wait_us(1000);
     }
     /* ========================================================================= */
     /* 分支 B：当前进入普通的 PCM 播放模式 */
@@ -154,14 +161,6 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         // 通过 I2C 软重置 DSD1794A, 重置后默认是PCM模式
         DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST); 
         wait_us(10000);
-
-        /* 1. 根据 XMOS 传入的 mClk 切换 22M 或 24M 晶振 */
-        if (mClk == MCLK_441) {
-            p_clk_en <: 0x01;
-        } else {
-            p_clk_en <: 0x02;
-        }
-        wait_us(20000);
 
         /* 2. 精确计算 PCM 的倍频模式 (SINGLE/DOUBLE/QUAD) */
         if (samFreq == 176400 || samFreq == 192000) 
@@ -183,15 +182,15 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         wait_us(2000);
 
         /* 3. 精确计算 PCM 的时钟基准 (441k系 或 48k系) */
-        // if (samFreq % 48000 == 0) {
-        //     clk_fmt_val |= 0x01;
-        // } else {
-        //     clk_fmt_val |= 0x00;
-        // }
+        if (samFreq % 48000 == 0) {
+            clk_fmt_val |= 0x01;
+        } else {
+            clk_fmt_val |= 0x00;
+        }
         
-        // clk_fmt_val |= 0x00;
-        // p_clk_fmt <: clk_fmt_val;
-        // wait_us(1000);
+        clk_fmt_val |= 0x00;
+        p_clk_fmt <: clk_fmt_val;
+        wait_us(1000);
     }
 
     return;
