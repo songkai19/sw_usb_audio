@@ -126,7 +126,7 @@
 
 /*** Defines relating to feature placement regarding tiles ***/
 #define XUA_AUDIO_IO_TILE_NUM (0)
-#define XUA_XUD_TILE_NUM (0)
+#define XUD_TILE (0)
 #define XUA_MIDI_TILE_NUM (0)
 #define XUA_SPDIF_TX_TILE_NUM (0)
 // #define XUA_PLL_REF_TILE_NUM (0)
@@ -146,28 +146,22 @@
 #endif
 #endif
 
-#ifndef XUA_POWERMODE_SELF
-#define XUA_POWERMODE_SELF (1)
-#endif
-
 /* Board power source - Default is self-powered */
-#ifndef XUA_POWERMODE
-#define XUA_POWERMODE XUA_POWERMODE_SELF
-#endif
+#define XUA_POWERMODE (XUA_POWERMODE_SELF)
 
 /* Enable/Disable example HID code - Default is off */
 #ifndef HID_CONTROLS
 #define HID_CONTROLS (0)
 #endif
 
-// #ifndef NATIVE_DSD
+#ifndef NATIVE_DSD
 #define NATIVE_DSD (1)
-// #endif
+#endif
 
 /* Number of DSD chans to DAC..*/
-// #ifndef DSD_CHANS_DAC
+#ifndef DSD_CHANS_DAC
 #define DSD_CHANS_DAC (2)
-// #endif
+#endif
 
 #define XUA_LOW_POWER_NON_STREAMING (1)
 
