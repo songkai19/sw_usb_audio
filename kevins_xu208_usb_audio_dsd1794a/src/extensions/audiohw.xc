@@ -142,9 +142,9 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         wait_us(20000);
 
         /* 配置格式控制脚：4F0=0 (441基准), 4F1=1 (DSD模式电平拉高) -> 二进制 0010 = 0x02 */
-        clk_fmt_val = 0x02;
-        p_clk_fmt <: clk_fmt_val;
-        wait_us(1000);
+        // clk_fmt_val = 0x02;
+        // p_clk_fmt <: clk_fmt_val;
+        // wait_us(1000);
     }
     /* ========================================================================= */
     /* 分支 B：当前进入普通的 PCM 播放模式 */
@@ -183,15 +183,15 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         wait_us(2000);
 
         /* 3. 精确计算 PCM 的时钟基准 (441k系 或 48k系) */
-        if (samFreq % 48000 == 0) {
-            clk_fmt_val |= 0x01;
-        } else {
-            clk_fmt_val |= 0x00;
-        }
+        // if (samFreq % 48000 == 0) {
+        //     clk_fmt_val |= 0x01;
+        // } else {
+        //     clk_fmt_val |= 0x00;
+        // }
         
-        clk_fmt_val |= 0x00;
-        p_clk_fmt <: clk_fmt_val;
-        wait_us(1000);
+        // clk_fmt_val |= 0x00;
+        // p_clk_fmt <: clk_fmt_val;
+        // wait_us(1000);
     }
 
     return;
