@@ -116,79 +116,57 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
     /* ========================================================================= */
     if ((dsdMode == DSD_MODE_NATIVE) || (dsdMode == DSD_MODE_DOP))
     {
-        // 通过 I2C 软重置 DSD1794A
-        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST);
+        // 1. 趁着硬件时钟开关还没动作，立刻发送 16位的 0x1440 进行 PCM 下的软重置
+        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST); 
         wait_us(10000);
 
-        // 通过 I2C 告知 DSD1794A 切换内部状态机到 DSD 模式
-        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_DSD);
+        // 2. 告诉芯片我们要正式开启 DSD 模式 (发送 0x1420)
+        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_DSD); 
+        wait_us(2000); 
+
+        // 3. 配置 DSD 模式下的模拟 FIR 滤波器 
+        DAC_REGWRITE(DSD1794_REG_18, DSD1794_VAL_DMF_DSD); 
         wait_us(2000);
 
-        DAC_REGWRITE(DSD1794_REG_18, DSD1794_VAL_DMF_DSD);
-        wait_us(2000);
-
-        // 每次进入DSD模式都要根据当下码率修改：DSD码率标识
-        /* 判断具体是 DSD64 还是 DSD128，并输出对应的物理引脚组合 */
-        if (samFreq > 300000) // DSD128 (5.6448 MHz)
-        {
-            // 【定制代码】：在这里根据你的硬件原理图，为 DSD128 输出特有的 GPIO 电平
-            // 例如让 CPLD 知道当前是双倍 DSD
-            mode_val = 0x02; 
-        }
-        else // 默认为 DSD64 (2.8224 MHz)
-        {
-            mode_val = 0x01; 
-        }
-        p_mode_sel <: mode_val;
-
-        wait_us(2000);
-
-        /* DSD 核心时钟强行锁定：DSD1794A 硬件规定 DSD 必须使用 22.5792MHz 晶振 (MCLK_441) */
-        // 只在第一次模式切换时锁定22M晶振，并且修改DSD模式标志位引脚状态
-        // p_clk_en <: 0x01;
-        // wait_us(20000);
-
-        /* 配置格式控制脚：4F0=0 (441基准), 4F1=1 (DSD模式电平拉高) -> 二进制 0010 = 0x02 */
+        // 4. 软件指令下发完毕后，立刻将 74LVC1G3157 硬件开关拉高 (0x02)
+        // 使 DSD1794A 的 PBCK/PLRCK 硬件引脚安全接地
         clk_fmt_val = 0x02;
         p_clk_fmt <: clk_fmt_val;
         wait_us(1000);
+
+        // 5. 判断具体是 DSD64 还是 DSD128 
+        if (samFreq > 300000) { mode_val = 0x02; } 
+        else { mode_val = 0x01; }
+        p_mode_sel <: mode_val;
+        wait_us(2000);
     }
     /* ========================================================================= */
     /* 分支 B：当前进入普通的 PCM 播放模式 */
     /* ========================================================================= */
     else 
     {
-        // 通过 I2C 软重置 DSD1794A, 重置后默认是PCM模式
-        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST); 
+        // 1. 首先释放 74LVC1G3157 开关 (0x00)，恢复硬件时钟输入到 DSD1794A
+        clk_fmt_val = 0x00;
+        p_clk_fmt <: clk_fmt_val;
+        wait_us(1000); 
+
+        // 2. 时钟通路已经接通了，立刻写入 0x1440 对 PCM 状态机执行干净的软重置
+        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST);
         wait_us(10000);
 
-        /* 2. 精确计算 PCM 的倍频模式 (SINGLE/DOUBLE/QUAD) */
-        if (samFreq == 176400 || samFreq == 192000) 
-        {
-            // QUAD MODE
-            mode_val = 0x03;
-        } 
-        else if (samFreq == 88200 || samFreq == 96000) 
-        {
-            // DOUBLE MODE
-            mode_val = 0x02;
-        } 
-        else 
-        {
-            // SINGLE MODE
-            mode_val = 0x01;
-        }
+        // // 3. 重置完后，确保寄存器 20 清除重置位并彻底呆在 PCM 模式下 (写入 0x1400)
+        // DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_PCM);
+        // wait_us(2000);
+
+        /* 4. 精确计算 PCM 的倍频模式 (SINGLE/DOUBLE/QUAD) */
+        if (samFreq == 176400 || samFreq == 192000) { mode_val = 0x03; } 
+        else if (samFreq == 88200 || samFreq == 96000) { mode_val = 0x02; } 
+        else { mode_val = 0x01; }
         p_mode_sel <: mode_val;
         wait_us(2000);
 
-        /* 3. 精确计算 PCM 的时钟基准 (441k系 或 48k系) */
-        if (samFreq % 48000 == 0) {
-            clk_fmt_val |= 0x01;
-        } else {
-            clk_fmt_val |= 0x00;
-        }
-        
-        clk_fmt_val |= 0x00;
+        /* 5. 精确计算 PCM 的时钟基准 (441k系 或 48k系) */
+        if (samFreq % 48000 == 0) { clk_fmt_val |= 0x01; }
         p_clk_fmt <: clk_fmt_val;
         wait_us(1000);
     }
