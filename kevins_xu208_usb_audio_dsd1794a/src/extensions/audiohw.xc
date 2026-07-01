@@ -51,16 +51,16 @@ void AudioHwInit(void)
     // 开机重置DAC
     // p_dac_rst_n <: 0;
 
-    /* 开机默认初始化：默认使能 45.1584MHz 晶振 */
+    /* 开机默认初始化：默认使能 22M 晶振 */
     /* 对应原厂图：4D0(X0D16) = 1, 4D1(X0D17) = 0 -> 二进制 0001 */
-    p_clk_en <: 0x01; 
-    wait_us(20000); 
+    p_clk_en <: 0x01;
+    wait_us(20000);
 
     /* 开机默认初始化：44.1kHz PCM SINGLE MODE */
     // SINGLE MODE (4E0=1, 4E1=0)
     p_mode_sel   <: 0x01;
     // 441 MODE + PCM MODE (4F0=0, 4F1=0)
-    p_clk_fmt <: 0x00; 
+    p_clk_fmt <: 0x00;
     wait_us(5000);
 
     return;
@@ -104,29 +104,17 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
     unsigned mode_val = 0x01; // P1, P2 倍频控制 (4E0, 4E1)
     unsigned clk_fmt_val = 0x00; // P3, P4 基准与格式 (4F0, 4F1)
 
-    if (mClk == MCLK_441) {
-        p_clk_en <: 0x01;
-    } else {
-        p_clk_en <: 0x02;
-    }
-    wait_us(20000);
-
     /* ========================================================================= */
     /* 分支 A：当前进入 DSD 播放模式 */
     /* ========================================================================= */
     if ((dsdMode == DSD_MODE_NATIVE) || (dsdMode == DSD_MODE_DOP))
     {
+        p_clk_en <: 0x01;
+        wait_us(20000);
+
         // 1. 趁着硬件时钟开关还没动作，立刻发送 16位的 0x1440 进行 PCM 下的软重置
-        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST); 
+        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST);
         wait_us(10000);
-
-        // 2. 告诉芯片我们要正式开启 DSD 模式 (发送 0x1420)
-        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_DSD); 
-        wait_us(2000); 
-
-        // 3. 配置 DSD 模式下的模拟 FIR 滤波器 
-        DAC_REGWRITE(DSD1794_REG_18, DSD1794_VAL_DMF_DSD); 
-        wait_us(2000);
 
         // 4. 软件指令下发完毕后，立刻将 74LVC1G3157 硬件开关拉高 (0x02)
         // 使 DSD1794A 的 PBCK/PLRCK 硬件引脚安全接地
@@ -134,8 +122,16 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         p_clk_fmt <: clk_fmt_val;
         wait_us(1000);
 
+        // 2. 告诉芯片我们要正式开启 DSD 模式 (发送 0x1420)
+        DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_DSD);
+        wait_us(2000);
+
+        // 3. 配置 DSD 模式下的模拟 FIR 滤波器 
+        DAC_REGWRITE(DSD1794_REG_18, DSD1794_VAL_DMF_DSD);
+        wait_us(2000);
+
         // 5. 判断具体是 DSD64 还是 DSD128 
-        if (samFreq > 300000) { mode_val = 0x02; } 
+        if (samFreq > 300000) { mode_val = 0x02; }
         else { mode_val = 0x01; }
         p_mode_sel <: mode_val;
         wait_us(2000);
@@ -145,10 +141,18 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
     /* ========================================================================= */
     else 
     {
+        /* 1. 根据 XMOS 传入的 mClk 切换 22M 或 24M 晶振 */
+        if (mClk == MCLK_441) {
+            p_clk_en <: 0x01;
+        } else {
+            p_clk_en <: 0x02;
+        }
+        wait_us(20000);
+
         // 1. 首先释放 74LVC1G3157 开关 (0x00)，恢复硬件时钟输入到 DSD1794A
         clk_fmt_val = 0x00;
         p_clk_fmt <: clk_fmt_val;
-        wait_us(1000); 
+        wait_us(1000);
 
         // 2. 时钟通路已经接通了，立刻写入 0x1440 对 PCM 状态机执行干净的软重置
         DAC_REGWRITE(DSD1794_REG_20, DSD1794_VAL_SRST);
@@ -159,8 +163,8 @@ void AudioHwConfig2(unsigned samFreq, unsigned mClk, unsigned dsdMode,
         // wait_us(2000);
 
         /* 4. 精确计算 PCM 的倍频模式 (SINGLE/DOUBLE/QUAD) */
-        if (samFreq == 176400 || samFreq == 192000) { mode_val = 0x03; } 
-        else if (samFreq == 88200 || samFreq == 96000) { mode_val = 0x02; } 
+        if (samFreq == 176400 || samFreq == 192000) { mode_val = 0x03; }
+        else if (samFreq == 88200 || samFreq == 96000) { mode_val = 0x02; }
         else { mode_val = 0x01; }
         p_mode_sel <: mode_val;
         wait_us(2000);
