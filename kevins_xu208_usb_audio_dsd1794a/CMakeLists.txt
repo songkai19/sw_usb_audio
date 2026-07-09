@@ -21,11 +21,11 @@ set(SW_USB_AUDIO_FLAGS
     -D_BOARD_SUPPORT_BOARD_H_ # 2. 注入此宏，强制阻断官方 Board Support 头文件的自动加载
 )
 
-set(APP_COMPILER_FLAGS_xu208_stereo ${SW_USB_AUDIO_FLAGS} -DI2S_CHANS_DAC=2 -DI2S_CHANS_ADC=0 -DNUM_USB_CHAN_OUT=2 -DNUM_USB_CHAN_IN=0 -DMIDI=0 -DXUA_SPDIF_TX_EN=0 -DXUA_SPDIF_RX_EN=0 -DADAT_TX=0 -DADAT_RX=0 -DDSD_CHANS_DAC=2 -DNATIVE_DSD=1 -DMAX_FREQ=192000 -DUSB_TILE=tile[0])
+set(APP_COMPILER_FLAGS_xu208_stereo ${SW_USB_AUDIO_FLAGS})
 
-include(${CMAKE_CURRENT_LIST_DIR}/configs_partial.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/configs_build.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/configs_test.cmake)
+# include(${CMAKE_CURRENT_LIST_DIR}/configs_partial.cmake)
+# include(${CMAKE_CURRENT_LIST_DIR}/configs_build.cmake)
+# include(${CMAKE_CURRENT_LIST_DIR}/configs_test.cmake)
 
 set(APP_INCLUDES src src/core src/extensions)
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)

@@ -7,12 +7,12 @@ APP_NAME = kevins_xu208_usb_audio
 
 # The flags passed to xcc when building the application
 # The EXTRA_BUILD_FLAGS variable can be used on the xmake command line to add options
-BUILD_FLAGS = -DFLASH_MAX_UPGRADE_SIZE=64*1024 -fcomment-asm -Xmapper --map -Xmapper MAPFILE -Wall -O3 -report -lquadflash -fsubword-select -save-temps -g -fxscope -DXSCOPE -DSDA_HIGH=2 -DSCL_HIGH=1 -DXUD_SERIES_SUPPORT=4 -march=xs2a -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DU208_ONLY
+BUILD_FLAGS = -DFLASH_MAX_UPGRADE_SIZE=64*1024 -fcomment-asm -Xmapper --map -Xmapper MAPFILE -Wall -O3 -report -lquadflash -fsubword-select -save-temps -g -fxscope -DXSCOPE -DSDA_HIGH=2 -DSCL_HIGH=1 -DXUD_SERIES_SUPPORT=4 -march=xs2a -DU208_ONLY
 
 # The USED_MODULES variable lists other module used by the application. These
 # modules will extend the SOURCE_DIRS, INCLUDE_DIRS and LIB_DIRS variables.
 # Modules are expected to be in the directory above the BASE_DIR directory.
-USED_MODULES = module_adat_rx module_adat_tx module_dfu module_i2c_shared module_i2c_single_port module_spdif_rx module_spdif_tx module_usb_audio module_usb_device module_usb_midi module_usb_shared module_xud
+USED_MODULES = module_i2c_shared module_i2c_single_port module_usb_audio module_usb_device module_usb_shared module_xud
 
 # Build config naming scheme:
 

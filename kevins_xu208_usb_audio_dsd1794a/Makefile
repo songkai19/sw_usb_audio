@@ -7,12 +7,12 @@ APP_NAME = kevins_xu208_usb_audio
 
 # The flags passed to xcc when building the application
 # The EXTRA_BUILD_FLAGS variable can be used on the xmake command line to add options
-BUILD_FLAGS = -DFLASH_MAX_UPGRADE_SIZE=64*1024 -fcomment-asm -Xmapper --map -Xmapper MAPFILE -Wall -O3 -report -lquadflash -fsubword-select -save-temps -g -fxscope -DXSCOPE -DSDA_HIGH=2 -DSCL_HIGH=1 -DXUD_SERIES_SUPPORT=4 -march=xs2a -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DU208_ONLY
+BUILD_FLAGS = -DFLASH_MAX_UPGRADE_SIZE=64*1024 -fcomment-asm -Xmapper --map -Xmapper MAPFILE -Wall -O3 -report -lquadflash -fsubword-select -save-temps -g -fxscope -DXSCOPE -DSDA_HIGH=2 -DSCL_HIGH=1 -DXUD_SERIES_SUPPORT=4 -march=xs2a -DU208_ONLY
 
 # The USED_MODULES variable lists other module used by the application. These
 # modules will extend the SOURCE_DIRS, INCLUDE_DIRS and LIB_DIRS variables.
 # Modules are expected to be in the directory above the BASE_DIR directory.
-USED_MODULES = lib_xua lib_i2c module_i2c_single_port module_spdif_rx module_spdif_tx module_usb_audio module_usb_device module_usb_shared module_xud
+USED_MODULES = lib_xua lib_i2c module_i2c_single_port module_usb_audio module_usb_device module_usb_shared module_xud
 
 # Build config naming scheme:
 
@@ -31,7 +31,7 @@ USED_MODULES = lib_xua lib_i2c module_i2c_single_port module_spdif_rx module_spd
 # e.g. 2AMi10o10xsxxx: Audio class 2.0, Asynchronous, I2S Master,input and output enabled (10 channels each), no MIDI, S/PDIF output, no S/PDIF input, no ADAT
 
 # Test build configs (Note these make use of the defaults in customdefines.h)
-XCC_FLAGS = $(BUILD_FLAGS) -DI2S_CHANS_DAC=2 -DI2S_CHANS_ADC=0 -DNUM_USB_CHAN_OUT=2 -DNUM_USB_CHAN_IN=0 -DMIDI=0 -DXUA_SPDIF_TX_EN=1 -DXUA_SPDIF_RX_EN=0 -DADAT_TX=0 -DADAT_RX=0 -DDSD_CHANS_DAC=2 -DMAX_FREQ=192000 -DNATIVE_DSD=1
+XCC_FLAGS = $(BUILD_FLAGS) -DNATIVE_DSD=1
 
 ifeq ($(TEST_CONFIGS),1)
 XCC_FLAGS_upgrade1 = $(BUILD_FLAGS) -DBCD_DEVICE_J=0x99 -DBCD_DEVICE_M=0x0 -DBCD_DEVICE_N=0x1
