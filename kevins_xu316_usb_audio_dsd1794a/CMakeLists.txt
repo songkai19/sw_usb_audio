@@ -8,6 +8,7 @@ set(APP_HW_TARGET XU316-1024-QF60B-C24.xn)
 include(${CMAKE_CURRENT_LIST_DIR}/../deps.cmake)
 
 set(APP_PCA_ENABLE OFF)
+set(APP_DEPENDENT_MODULES "lib_gpio")
 
 # 3. 核心配置：添加你的自定义 Zbit Flash 规格文件与 QSPI 烧录参数
 set(MY_FLASH_SPEC "${CMAKE_CURRENT_SOURCE_DIR}/zbit_flash.spec")

@@ -42,8 +42,8 @@
             <Port Location="XS1_PORT_1G" Name="PORT_I2S_BCLK"/> <!-- PBCK -->
             <Port Location="XS1_PORT_1F" Name="PORT_I2S_DAC0"/> <!-- PDATA -->
             <Port Location="XS1_PORT_1C" Name="PORT_DSD_DAC0"/> <!-- DSDR -->
-            <port Location="XS1_PORT_1A" Name="PORT_DSD_DAC1"/> <!-- DSDL -->
-            <Port Location="XS1_PORT_1B" Name="PORT_DSD_CLK"/> <!-- DBCK -->
+            <port Location="XS1_PORT_1B" Name="PORT_DSD_DAC1"/> <!-- DSDL -->
+            <Port Location="XS1_PORT_1A" Name="PORT_DSD_CLK"/> <!-- DBCK -->
 
             <!-- Clocking -->
             <Port Location="XS1_PORT_16A" Name="PORT_MCLK_COUNT_2"/>
